@@ -1,0 +1,97 @@
+2025-05-12 03:42:26,865 - INFO - Environment setup completed.
+2025-05-12 03:42:26,866 - INFO - Model initialized successfully.
+2025-05-12 03:42:26,866 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:42:26,867 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:48:25,763 - INFO - Environment setup completed.
+2025-05-12 03:48:25,764 - INFO - Model initialized successfully.
+2025-05-12 03:48:25,764 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:48:25,764 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:48:27,780 - INFO - Environment setup completed.
+2025-05-12 03:48:27,780 - INFO - Model initialized successfully.
+2025-05-12 03:48:27,782 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:48:27,782 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:50:30,184 - INFO - Environment setup completed.
+2025-05-12 03:50:30,184 - INFO - Model initialized successfully.
+2025-05-12 03:50:30,185 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:50:30,186 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:40,925 - INFO - Environment setup completed.
+2025-05-12 03:53:40,926 - INFO - Model initialized successfully.
+2025-05-12 03:53:40,926 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:40,926 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:42,505 - INFO - Environment setup completed.
+2025-05-12 03:53:42,505 - INFO - Model initialized successfully.
+2025-05-12 03:53:42,505 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:42,506 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:42,691 - INFO - Environment setup completed.
+2025-05-12 03:53:42,692 - INFO - Model initialized successfully.
+2025-05-12 03:53:42,692 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:42,692 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:43,056 - INFO - Environment setup completed.
+2025-05-12 03:53:43,057 - INFO - Model initialized successfully.
+2025-05-12 03:53:43,057 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:43,057 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:56,922 - INFO - Environment setup completed.
+2025-05-12 03:53:56,922 - INFO - Model initialized successfully.
+2025-05-12 03:53:56,922 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:56,923 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:57,733 - INFO - Environment setup completed.
+2025-05-12 03:53:57,734 - INFO - Model initialized successfully.
+2025-05-12 03:53:57,734 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:53:57,735 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:55:43,839 - INFO - Environment setup completed.
+2025-05-12 03:55:43,839 - INFO - Model initialized successfully.
+2025-05-12 03:55:43,839 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:55:43,840 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:55:45,758 - INFO - Environment setup completed.
+2025-05-12 03:55:45,758 - INFO - Model initialized successfully.
+2025-05-12 03:55:45,758 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:55:45,758 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 03:56:33,370 - INFO - Environment setup completed.
+2025-05-12 03:56:33,370 - INFO - Model initialized successfully.
+2025-05-12 03:56:33,370 - ERROR - Error evaluating answer: '\n  "score"'
+2025-05-12 03:56:33,370 - ERROR - Error processing request: 500: Error evaluating answer: '\n  "score"'
+2025-05-12 10:01:25,065 - INFO - Environment setup completed.
+2025-05-12 10:01:25,087 - INFO - Model initialized successfully.
+2025-05-12 10:01:26,257 - INFO - Raw Gemini API response: Score: 0.8000
+Explanation:The user correctly identifies Dart as a programming language focused on building fast apps across platforms.  This demonstrates a good grasp of the core concept.  The answer could be improved by mentioning its association with Flutter, a key framework Dart is used with, and perhaps a brief note on its client-optimized nature.
+
+2025-05-12 10:01:26,258 - INFO - Cleaned scoring response: Score: 0.8000
+Explanation:The user correctly identifies Dart as a programming language focused on building fast apps across platforms.  This demonstrates a good grasp of the core concept.  The answer could be improved by mentioning its association with Flutter, a key framework Dart is used with, and perhaps a brief note on its client-optimized nature.
+2025-05-12 10:01:26,875 - INFO - Raw Gemini API response: https://dart.dev/
+https://flutter.dev/docs/get-started/install
+https://www.tutorialspoint.com/dart/index.htm
+
+2025-05-12 10:01:26,876 - INFO - Cleaned links response: https://dart.dev/
+https://flutter.dev/docs/get-started/install
+https://www.tutorialspoint.com/dart/index.htm
+2025-05-12 10:01:26,876 - INFO - Successfully evaluated answers
+2025-05-12 10:02:17,648 - INFO - Environment setup completed.
+2025-05-12 10:02:17,649 - INFO - Model initialized successfully.
+2025-05-12 10:02:18,646 - INFO - Raw Gemini API response: Score: 0.9
+Explanation:The user demonstrates a good understanding of supervised learning.  The answer correctly identifies the use of labeled data and the goal of prediction.  To improve, the answer could explicitly mention the "classification" aspect of supervised learning, as it's a key component alongside prediction.
+
+2025-05-12 10:02:18,646 - INFO - Cleaned scoring response: Score: 0.9
+Explanation:The user demonstrates a good understanding of supervised learning.  The answer correctly identifies the use of labeled data and the goal of prediction.  To improve, the answer could explicitly mention the "classification" aspect of supervised learning, as it's a key component alongside prediction.
+2025-05-12 10:02:19,432 - INFO - Raw Gemini API response: https://developers.google.com/machine-learning/crash-course/ml-intro
+https://www.coursera.org/lecture/machine-learning/supervised-learning-vs-unsupervised-learning-jkwZS
+https://scikit-learn.org/stable/supervised_learning.html
+
+2025-05-12 10:02:19,432 - INFO - Cleaned links response: https://developers.google.com/machine-learning/crash-course/ml-intro
+https://www.coursera.org/lecture/machine-learning/supervised-learning-vs-unsupervised-learning-jkwZS
+https://scikit-learn.org/stable/supervised_learning.html
+2025-05-12 10:02:19,433 - INFO - Successfully evaluated answers
+2025-05-12 10:02:49,298 - INFO - Environment setup completed.
+2025-05-12 10:02:49,298 - INFO - Model initialized successfully.
+2025-05-12 10:02:50,371 - INFO - Raw Gemini API response: Score: 0.8000
+Explanation:The user correctly identifies HTML's role in building the basic structure of web pages.  The mention of "tags and elements" shows some understanding of how HTML works.  To improve, the answer could explicitly state that HTML creates the *content* of the webpage, not just the structure, and perhaps mention the concept of "markup language".
+
+2025-05-12 10:02:50,372 - INFO - Cleaned scoring response: Score: 0.8000
+Explanation:The user correctly identifies HTML's role in building the basic structure of web pages.  The mention of "tags and elements" shows some understanding of how HTML works.  To improve, the answer could explicitly state that HTML creates the *content* of the webpage, not just the structure, and perhaps mention the concept of "markup language".
+2025-05-12 10:02:51,060 - INFO - Raw Gemini API response: https://developer.mozilla.org/en-US/docs/Web/HTML
+https://www.w3.org/html/
+https://www.codecademy.com/learn/learn-html
+
+2025-05-12 10:02:51,061 - INFO - Cleaned links response: https://developer.mozilla.org/en-US/docs/Web/HTML
+https://www.w3.org/html/
+https://www.codecademy.com/learn/learn-html
+2025-05-12 10:02:51,062 - INFO - Successfully evaluated answers
