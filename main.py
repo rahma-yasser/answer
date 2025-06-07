@@ -61,25 +61,28 @@ class OutputData(BaseModel):
 
 # Scoring and link generation prompts
 SCORING_PROMPT = """
-You are an expert evaluator AI helping score user answers in an educational interview system. Your goal is to assess whether the user demonstrates a basic understanding of the core concept, even if their phrasing, examples, or terminology differ from the ideal answer. Focus on the idea and understanding, not grammar, style, or advanced explanations.
+You are an expert evaluator AI scoring user answers for an educational interview system. Assess if the user understands the core concept, focusing on ideas, not grammar or style.
 
 Question: {question}
 Reference Answer: {reference_answer}
 User Answer: {user_answer}
 
 Evaluation Guide:
-- Score 0.9–1.0: Excellent answer — captures the core idea well, with clear and accurate details.
-- Score 0.5–0.8: Partial understanding — correct direction but lacks clarity or key details.
-- Score below 0.5: Misunderstood, unrelated, or significantly incorrect answer.
+- Score 0.9–1.0: Excellent answer — captures core idea with clear details.
+- Score 0.5–0.8: Partial understanding — correct but lacks clarity or details.
+- Score below 0.5: Misunderstood, unrelated, or incorrect answer.
 
 Instructions:
-- Award a score between 0 and 1 (rounded to 4 decimals) based on how well the user understood the core concept.
-- Provide a short, clear, and constructive explanation in a conversational tone, addressing the user directly (e.g., 'Your answer is great because...' or 'Your answer is empty, please provide more details.'). Mention what was done well and what could be improved.
-- If the user answer is empty or very short, explicitly state this and suggest providing a detailed response.
-- Return the response as plain text in the format:
+- Award a score between 0 and 1 (rounded to 4 decimals).
+- Provide a concise explanation (1-2 sentences) in a conversational tone, addressing the user directly (e.g., 'Your answer is great because...').
+- If the answer is empty or very short, note this and suggest adding details.
+- End with a brief 'Strengths' and 'Weaknesses' section, each with 1 short point.
+- Return as plain text in the format:
 Score: <float>
 Explanation: <string>
-- Do not include code blocks, extra whitespace, or any other formatting.
+Strengths: <string>
+Weaknesses: <string>
+- Do not include code blocks or extra whitespace.
 """
 
 LINK_GENERATION_PROMPT = """
@@ -171,60 +174,68 @@ class Evaluator:
             response_text = response_text.strip()
             logger.info(f"Raw scoring response: {response_text}")
 
-            # Parse text response with more flexible regex
+            # Parse text response with flexible regex
             try:
                 score_match = re.search(r"Score:\s*(\d*\.?\d+)", response_text, re.IGNORECASE)
-                explanation_match = re.search(r"Explanation:\s*(.*?)(?:\n|$|\Z)", response_text, re.DOTALL | re.IGNORECASE)
+                explanation_match = re.search(r"Explanation:\s*(.*?)(?:\nStrengths:|\Z)", response_text, re.DOTALL | re.IGNORECASE)
+                strengths_match = re.search(r"Strengths:\s*(.*?)(?:\nWeaknesses:|\Z)", response_text, re.DOTALL | re.IGNORECASE)
+                weaknesses_match = re.search(r"Weaknesses:\s*(.*?)(?:\n|$|\Z)", response_text, re.DOTALL | re.IGNORECASE)
+
                 score = float(score_match.group(1)) if score_match else 0.0
-                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation could be parsed from the response."
+                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation could be parsed."
+                strengths = strengths_match.group(1).strip() if strengths_match else "None identified."
+                weaknesses = weaknesses_match.group(1).strip() if weaknesses_match else "None identified."
                 if not explanation:
-                    explanation = "No explanation could be parsed from the response."
+                    explanation = "No explanation could be parsed."
             except Exception as e:
                 logger.error(f"Failed to parse text response: {str(e)}, response: {response_text}")
-                explanation = "We couldn’t generate an explanation due to an issue with the response."
+                explanation = "We couldn’t generate an explanation due to an issue."
+                strengths = "None identified."
+                weaknesses = "None identified."
                 score = 0.0
 
             # Handle empty or short user answers
             if not user_answer.strip():
                 score = 0.0
-                explanation = "Your answer is empty. Please provide a response to the question to receive a score and feedback."
-            elif len(user_answer.split()) < 3:  # Short or vague answers
-                score = min(score, 0.3)  # Cap score for very short answers
-                explanation = (
-                    f"Your answer is too brief to fully assess your understanding of '{question}'. "
-                    f"Try providing more details or examples, like those in the reference answer: '{reference_answer}'."
-                )
-            else:
-                # Fallback to keyword-based scoring if parsing failed
-                if explanation == "No explanation could be parsed from the response." or explanation == "We couldn’t generate an explanation due to an issue with the response.":
-                    core_keywords = reference_answer.lower().split()
-                    user_words = user_answer.lower().split()
-                    matching_keywords = len(set(core_keywords) & set(user_words))
-                    keyword_ratio = matching_keywords / len(core_keywords) if core_keywords else 0
+                explanation = "Your answer is empty."
+                strengths = "None."
+                weaknesses = "No response provided."
+            elif len(user_answer.split()) < 3:
+                score = min(score, 0.3)
+                explanation = f"Your answer is too brief for '{question}'."
+                strengths = "Attempted to answer."
+                weaknesses = f"Needs more details like: '{reference_answer}'."
 
-                    if keyword_ratio >= 0.8:
-                        score = round(0.9 + (keyword_ratio * 0.1), 4)
-                        explanation = (
-                            f"Your answer captures the main idea of '{question}' well, similar to the reference answer. "
-                            f"To improve, try adding more specific details or examples like those in: '{reference_answer}'."
-                        )
-                    elif keyword_ratio >= 0.4:
-                        score = round(0.5 + (keyword_ratio * 0.3), 4)
-                        explanation = (
-                            f"Your answer shows some understanding of '{question}', but it’s missing key details. "
-                            f"Review the reference answer: '{reference_answer}' and try including more specific terms or examples."
-                        )
-                    else:
-                        score = round(keyword_ratio * 0.5, 4)
-                        explanation = (
-                            f"Your answer doesn’t fully address the core concept of '{question}'. "
-                            f"Please review the reference answer: '{reference_answer}' to focus on the key ideas."
-                        )
+            # Fallback to keyword-based scoring if parsing failed
+            if explanation in ["No explanation could be parsed.", "We couldn’t generate an explanation due to an issue."]:
+                core_keywords = reference_answer.lower().split()
+                user_words = user_answer.lower().split()
+                matching_keywords = len(set(core_keywords) & set(user_words))
+                keyword_ratio = matching_keywords / len(core_keywords) if core_keywords else 0
+
+                if keyword_ratio >= 0.8:
+                    score = round(0.9 + (keyword_ratio * 0.1), 4)
+                    explanation = f"Your answer captures the main idea of '{question}'."
+                    strengths = "Good grasp of core concept."
+                    weaknesses = f"Could add details like: '{reference_answer}'."
+                elif keyword_ratio >= 0.4:
+                    score = round(0.5 + (keyword_ratio * 0.3), 4)
+                    explanation = f"Your answer partly addresses '{question}'."
+                    strengths = "Some relevant points included."
+                    weaknesses = f"Misses key details in: '{reference_answer}'."
+                else:
+                    score = round(keyword_ratio * 0.5, 4)
+                    explanation = f"Your answer misses the core of '{question}'."
+                    strengths = "Attempted to answer."
+                    weaknesses = f"Needs focus on: '{reference_answer}'."
+
+            # Combine explanation with strengths and weaknesses
+            full_explanation = f"{explanation}\nStrengths: {strengths}\nWeaknesses: {weaknesses}"
 
             links = await self.get_links(question, reference_answer)
             return {
                 "score": score,
-                "score_explanation": explanation,
+                "score_explanation": full_explanation,
                 "links": links
             }
         except Exception as e:
