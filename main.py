@@ -74,7 +74,8 @@ Evaluation Guide:
 
 Instructions:
 - Award a score between 0 and 1 (rounded to 4 decimals) based on how well the user understood the core concept.
-- Provide a short, clear, and constructive explanation of the score, mentioning what was done well and what could be improved.
+- Provide a short, clear, and constructive explanation in a conversational tone, addressing the user directly (e.g., 'Your answer is great because...' or 'Your answer is empty, please provide more details.'). Mention what was done well and what could be improved.
+- If the user answer is empty or very short, explicitly state this and suggest providing a detailed response.
 - Return the response as plain text in the format:
 Score: <float>
 Explanation: <string>
@@ -168,40 +169,57 @@ class Evaluator:
             response_text = await self.generate_content(prompt, response_type="text/plain")
             # Clean response
             response_text = response_text.strip()
-            logger.info(f"Cleaned scoring response: {response_text}")
+            logger.info(f"Raw scoring response: {response_text}")
 
-            # Parse text response
+            # Parse text response with more flexible regex
             try:
-                score_match = re.search(r"Score: (\d*\.?\d+)", response_text)
-                explanation_match = re.search(r"Explanation: (.*?)(?:\n|$)", response_text, re.DOTALL)
+                score_match = re.search(r"Score:\s*(\d*\.?\d+)", response_text, re.IGNORECASE)
+                explanation_match = re.search(r"Explanation:\s*(.*?)(?:\n|$|\Z)", response_text, re.DOTALL | re.IGNORECASE)
                 score = float(score_match.group(1)) if score_match else 0.0
-                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation provided."
+                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation could be parsed from the response."
+                if not explanation:
+                    explanation = "No explanation could be parsed from the response."
             except Exception as e:
                 logger.error(f"Failed to parse text response: {str(e)}, response: {response_text}")
-                # Fallback to keyword-based scoring
-                core_keywords = reference_answer.lower().split()
-                user_words = user_answer.lower().split()
-                matching_keywords = len(set(core_keywords) & set(user_words))
-                keyword_ratio = matching_keywords / len(core_keywords) if core_keywords else 0
+                explanation = "We couldn’t generate an explanation due to an issue with the response."
+                score = 0.0
 
-                if keyword_ratio >= 0.8:
-                    score = round(0.9 + (keyword_ratio * 0.1), 4)
-                    explanation = (
-                        f"The user answer captures the core idea of '{question}' well, aligning closely with the reference answer. "
-                        f"To improve, consider adding more specific details like those in the reference answer."
-                    )
-                elif keyword_ratio >= 0.4:
-                    score = round(0.5 + (keyword_ratio * 0.3), 4)
-                    explanation = (
-                        f"The user answer shows partial understanding of '{question}' but misses some key details present in the reference answer. "
-                        f"Try incorporating more specific terms or examples to enhance clarity."
-                    )
-                else:
-                    score = round(keyword_ratio * 0.5, 4)
-                    explanation = (
-                        f"The user answer does not fully address the core concept of '{question}'. "
-                        f"Review the reference answer and focus on including key concepts for a stronger response."
-                    )
+            # Handle empty or short user answers
+            if not user_answer.strip():
+                score = 0.0
+                explanation = "Your answer is empty. Please provide a response to the question to receive a score and feedback."
+            elif len(user_answer.split()) < 3:  # Short or vague answers
+                score = min(score, 0.3)  # Cap score for very short answers
+                explanation = (
+                    f"Your answer is too brief to fully assess your understanding of '{question}'. "
+                    f"Try providing more details or examples, like those in the reference answer: '{reference_answer}'."
+                )
+            else:
+                # Fallback to keyword-based scoring if parsing failed
+                if explanation == "No explanation could be parsed from the response." or explanation == "We couldn’t generate an explanation due to an issue with the response.":
+                    core_keywords = reference_answer.lower().split()
+                    user_words = user_answer.lower().split()
+                    matching_keywords = len(set(core_keywords) & set(user_words))
+                    keyword_ratio = matching_keywords / len(core_keywords) if core_keywords else 0
+
+                    if keyword_ratio >= 0.8:
+                        score = round(0.9 + (keyword_ratio * 0.1), 4)
+                        explanation = (
+                            f"Your answer captures the main idea of '{question}' well, similar to the reference answer. "
+                            f"To improve, try adding more specific details or examples like those in: '{reference_answer}'."
+                        )
+                    elif keyword_ratio >= 0.4:
+                        score = round(0.5 + (keyword_ratio * 0.3), 4)
+                        explanation = (
+                            f"Your answer shows some understanding of '{question}', but it’s missing key details. "
+                            f"Review the reference answer: '{reference_answer}' and try including more specific terms or examples."
+                        )
+                    else:
+                        score = round(keyword_ratio * 0.5, 4)
+                        explanation = (
+                            f"Your answer doesn’t fully address the core concept of '{question}'. "
+                            f"Please review the reference answer: '{reference_answer}' to focus on the key ideas."
+                        )
 
             links = await self.get_links(question, reference_answer)
             return {
