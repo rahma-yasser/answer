@@ -61,7 +61,7 @@ class OutputData(BaseModel):
 
 # Scoring and link generation prompts
 SCORING_PROMPT = """
-You are an expert evaluator AI scoring user answers for an educational interview system. Assess if the user understands the core concept, focusing on ideas, not grammar or style.
+You are an expert evaluator AI scoring user answers for an educational interview system. Assess if the user understands the core concept, focusing only on key ideas, not grammar or style.
 
 Question: {question}
 Reference Answer: {reference_answer}
@@ -69,14 +69,14 @@ User Answer: {user_answer}
 
 Evaluation Guide:
 - Score 0.9–1.0: Excellent answer — captures core idea with clear details.
-- Score 0.5–0.8: Partial understanding — correct but lacks clarity or details.
-- Score below 0.5: Misunderstood, unrelated, or incorrect answer.
+- Score 0.5–0.8: Partial understanding — correct but lacks key details.
+- Score below 0.5: Misunderstood or incorrect answer.
 
 Instructions:
 - Award a score between 0 and 1 (rounded to 4 decimals).
-- Provide a concise explanation (1-2 sentences) in a conversational tone, addressing the user directly (e.g., 'Your answer is great because...').
-- If the answer is empty or very short, note this and suggest adding details.
-- End with a brief 'Strengths' and 'Weaknesses' section, each with 1 short point.
+- Provide a 1-sentence explanation in a conversational tone, addressing the user directly (e.g., 'Your answer nails the core idea!' or 'Your answer misses the main point.').
+- If the answer is empty or too short, note this briefly.
+- End with a 'Strengths' and 'Weaknesses' section, each with 1 concise phrase or sentence.
 - Return as plain text in the format:
 Score: <float>
 Explanation: <string>
@@ -182,16 +182,16 @@ class Evaluator:
                 weaknesses_match = re.search(r"Weaknesses:\s*(.*?)(?:\n|$|\Z)", response_text, re.DOTALL | re.IGNORECASE)
 
                 score = float(score_match.group(1)) if score_match else 0.0
-                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation could be parsed."
-                strengths = strengths_match.group(1).strip() if strengths_match else "None identified."
-                weaknesses = weaknesses_match.group(1).strip() if weaknesses_match else "None identified."
+                explanation = explanation_match.group(1).strip() if explanation_match else "No explanation parsed."
+                strengths = strengths_match.group(1).strip() if strengths_match else "None."
+                weaknesses = weaknesses_match.group(1).strip() if weaknesses_match else "None."
                 if not explanation:
-                    explanation = "No explanation could be parsed."
+                    explanation = "No explanation parsed."
             except Exception as e:
                 logger.error(f"Failed to parse text response: {str(e)}, response: {response_text}")
-                explanation = "We couldn’t generate an explanation due to an issue."
-                strengths = "None identified."
-                weaknesses = "None identified."
+                explanation = "Unable to generate explanation."
+                strengths = "None."
+                weaknesses = "None."
                 score = 0.0
 
             # Handle empty or short user answers
@@ -199,15 +199,15 @@ class Evaluator:
                 score = 0.0
                 explanation = "Your answer is empty."
                 strengths = "None."
-                weaknesses = "No response provided."
+                weaknesses = "No response given."
             elif len(user_answer.split()) < 3:
                 score = min(score, 0.3)
-                explanation = f"Your answer is too brief for '{question}'."
-                strengths = "Attempted to answer."
-                weaknesses = f"Needs more details like: '{reference_answer}'."
+                explanation = "Your answer is too short."
+                strengths = "Attempt made."
+                weaknesses = "Lacks detail."
 
             # Fallback to keyword-based scoring if parsing failed
-            if explanation in ["No explanation could be parsed.", "We couldn’t generate an explanation due to an issue."]:
+            if explanation in ["No explanation parsed.", "Unable to generate explanation."]:
                 core_keywords = reference_answer.lower().split()
                 user_words = user_answer.lower().split()
                 matching_keywords = len(set(core_keywords) & set(user_words))
@@ -215,19 +215,19 @@ class Evaluator:
 
                 if keyword_ratio >= 0.8:
                     score = round(0.9 + (keyword_ratio * 0.1), 4)
-                    explanation = f"Your answer captures the main idea of '{question}'."
-                    strengths = "Good grasp of core concept."
-                    weaknesses = f"Could add details like: '{reference_answer}'."
+                    explanation = "Your answer hits the core idea."
+                    strengths = "Key concept captured."
+                    weaknesses = "Add more detail."
                 elif keyword_ratio >= 0.4:
                     score = round(0.5 + (keyword_ratio * 0.3), 4)
-                    explanation = f"Your answer partly addresses '{question}'."
-                    strengths = "Some relevant points included."
-                    weaknesses = f"Misses key details in: '{reference_answer}'."
+                    explanation = "Your answer is partially correct."
+                    strengths = "Some relevant points."
+                    weaknesses = "Misses key details."
                 else:
                     score = round(keyword_ratio * 0.5, 4)
-                    explanation = f"Your answer misses the core of '{question}'."
-                    strengths = "Attempted to answer."
-                    weaknesses = f"Needs focus on: '{reference_answer}'."
+                    explanation = "Your answer misses the main point."
+                    strengths = "Attempt made."
+                    weaknesses = "Needs core focus."
 
             # Combine explanation with strengths and weaknesses
             full_explanation = f"{explanation}\nStrengths: {strengths}\nWeaknesses: {weaknesses}"
